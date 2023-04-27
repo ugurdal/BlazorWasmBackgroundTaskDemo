@@ -1,0 +1,71 @@
+﻿@inherits LayoutComponentBase
+@inject PeriodicExecutor PeriodicExecutor
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu/>
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+
+@code
+{
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            Console.WriteLine("first render");
+            
+            
+            
+            _ = Task.Run(async () =>
+            {
+                Console.WriteLine("task initialized");
+                PrintOutCurrentDate();
+
+                // example 1: with while loop
+                while (true)
+                {
+                    await Task.Delay(1 * 1000);
+                    PrintOutCurrentDate();
+                    StateHasChanged();
+                }
+
+                // example 2: with periodic timer
+                // var timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
+                // while (await timer.WaitForNextTickAsync())
+                // {
+                //     PrintOutCurrentDate();
+                // }
+                
+                // example 3: from stackoverflow
+                // https://stackoverflow.com/questions/67619072/periodic-background-task-in-blazor-wasm
+                // PeriodicExecutor.StartExecuting();
+                // PeriodicExecutor.JobExecuted += (sender, args) =>
+                // {
+                //     PrintOutCurrentDate();
+                // };
+            });
+        }
+
+        base.OnAfterRender(firstRender);
+    }
+
+    private static void PrintOutCurrentDate()
+    {
+        Console.WriteLine("ping-timer utc {0}", DateTime.UtcNow.ToUniversalTime());
+    // Console.WriteLine("ping-timer binary {0}", DateTime.UtcNow.ToBinary());
+    // Console.WriteLine("ping-timer millisec {0}", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+    // Console.WriteLine("ping-timer sec {0}", DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+    }
+}
